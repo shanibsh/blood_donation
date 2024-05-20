@@ -1,36 +1,48 @@
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class AddUser extends StatefulWidget {
-  const AddUser({super.key});
+class UpdateDonor extends StatefulWidget {
+  const UpdateDonor({super.key});
 
   @override
-  State<AddUser> createState() => _AddUserState();
+  State<UpdateDonor> createState() => _UpdateDonorState();
 }
 
-class _AddUserState extends State<AddUser> {
+class _UpdateDonorState extends State<UpdateDonor> {
   final bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
   String? selectedGroups;
   final CollectionReference donor =
       FirebaseFirestore.instance.collection('donor');
 
-  void addDonor() {
-    final data = {
-      'name': donorName.text,
-      'group': selectedGroups,
-      'phone': donorPhone.text
-    };
-    donor.add(data);
-  }
-
   TextEditingController donorName = TextEditingController();
   TextEditingController donorPhone = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  Future<void> updateDonorFf(docId) async {
+    
+      final  data =  {
+      'name': donorName.text,
+      'group': selectedGroups,
+      'phone': donorPhone.text,
+    };
+
+    donor.doc(docId).update(data);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+
+    donorName.text = args['name'];
+    donorPhone.text = args['phone'];
+    selectedGroups = args['group'];
+    final docId = args['id'];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Donors"),
+        title: const Text("Update Donors"),
         centerTitle: true,
         backgroundColor: Colors.red,
       ),
@@ -51,9 +63,7 @@ class _AddUserState extends State<AddUser> {
                   },
                   controller: donorName,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    label: Text("Donor Name"),
-                  ),
+                      border: OutlineInputBorder(), label: Text("Donor Name")),
                 ),
               ),
               Padding(
@@ -76,12 +86,13 @@ class _AddUserState extends State<AddUser> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButtonFormField(
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'please select your blood group';
+                     validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a blood group';
                       }
                       return null;
                     },
+                    value: selectedGroups,
                     decoration: const InputDecoration(
                         label: Text('Select Blood Group')),
                     items: bloodGroups
@@ -91,22 +102,26 @@ class _AddUserState extends State<AddUser> {
                             ))
                         .toList(),
                     onChanged: (val) {
-                      selectedGroups = val as String;
+                      setState(() {
+                        selectedGroups = val;
+                      });
                     }),
               ),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    addDonor();
+                    updateDonorFf(docId);
                     Navigator.pop(context);
+                   
                   }
+                 
                 },
                 style: ButtonStyle(
                     minimumSize: WidgetStateProperty.all(
                         const Size(double.infinity, 50)),
                     backgroundColor: WidgetStateProperty.all(Colors.red)),
                 child: const Text(
-                  "Submit",
+                  "update",
                   style: TextStyle(
                     fontSize: 20,
                     color: Colors.white,

@@ -11,6 +11,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final CollectionReference donor =
       FirebaseFirestore.instance.collection('donor');
+
+      void deleteDonor(docId){
+        donor.doc(docId).delete();
+      }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +35,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: StreamBuilder(
-        stream: donor.snapshots(),
+        stream: donor.orderBy('name').snapshots(),
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
@@ -45,9 +49,9 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
-                          color: const Color.fromARGB(255, 219, 213, 213),
+                          color: Color.fromARGB(255, 219, 213, 213),
                           blurRadius: 10,
                           spreadRadius: 15
                         
@@ -57,48 +61,64 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
+                        Container(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: CircleAvatar(
                               backgroundColor: Colors.red,
                               radius: 30,
                               child: Text(
                                 donorSnap['group'],
-                                style: TextStyle(fontSize: 25),
+                                style: const TextStyle(fontSize: 25),
                               ),
                             ),
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              donorSnap['name'],
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                donorSnap['name'],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              donorSnap['phone'].toString(),
-                              style: TextStyle(
-                                fontSize: 18,
+                              Text(
+                                donorSnap['phone'].toString(),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         Row(
                           children: [
                             IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.edit),
+                              onPressed: () {
+
+                                Navigator.pushNamed(context, '/update',
+                                arguments: {
+                                  'name': donorSnap['name'],
+                                  'phone':donorSnap['phone'].toString(),
+                                  'group':donorSnap['group'],
+                                  'id':donorSnap.id,
+                                  
+                                });
+                                
+
+                              },
+                              icon: const Icon(Icons.edit),
                               iconSize: 30,
                               color: Colors.blue,
                             ),
                             IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                deleteDonor(donorSnap.id);
+                              },
+                              icon: const Icon(Icons.delete),
                               iconSize: 30,
                               color: Colors.red,
                             ),

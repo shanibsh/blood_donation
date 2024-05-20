@@ -1,8 +1,10 @@
 import 'package:blood_donation/add.dart';
 import 'package:blood_donation/firebase_options.dart';
 import 'package:blood_donation/home.dart';
+import 'package:blood_donation/update.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/add': (context) => const AddUser(),
+        '/update': (context) => const UpdateDonor(),
       },
       initialRoute: '/',
     );
